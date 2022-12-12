@@ -1,33 +1,37 @@
 import turtle
 
-# Metodo para obter a tela
+# Screen() method to get screen
 screen = turtle.getscreen()
 
-# Cria a caneta
+# Creating pen object
 pen = turtle.Turtle()
 
 
-def triangle(x, y):
+# Function to draw triangles from mouse click events on the screen
+def get_triangle(x, y):
 
-    # Usado para desenhar sem caneta
+    # It is used to draw out the pen
     pen.penup()
 
-    # Muda o cursor ate a posicao x e y
+    # It is used to move cursor at x
+    # and y position
     pen.goto(x, y)
 
-    # Usado para desenhar com caneta
+    # It is used to draw in the pen
     pen.pendown()
 
-    # Desenha o formato do trangulo
+    # Draw the triangle
     for i in range(3):
         pen.fd(100)
         pen.lt(120)
         pen.fd(100)
 
-# Envia o cursor da posicao atual para o triangulo
-turtle.onscreenclick(triangle, 1)
+
+# Special built in function to send current
+# position of cursor to triangle
+turtle.onscreenclick(get_triangle, 1)
 
 turtle.listen()
 
-# Segura a tela
+# Hold the screen
 turtle.done()
