@@ -34,10 +34,10 @@ player_two.circle(40)
 player_two.penup()
 player_two.goto(-200, -100)
 
-# Numbers' dice
+# Dice numbers
 die = [1, 2, 3, 4, 5, 6]
 
-# Players' matches
+# The matches of the game
 for i in range(20):
 
     # Player one wins
@@ -49,6 +49,8 @@ for i in range(20):
     elif player_two.pos() >= (300, -100):
         print("Player Two Wins!")
         break
+
+    # Dice roll
     else:
         # Turno do jogador um
         player_one_turn = input("Press 'Enter' to roll the die")

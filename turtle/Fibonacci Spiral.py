@@ -3,7 +3,7 @@ import math
 
 
 # Function to draw a fibonacci espiral fractal
-def create_fibonacci(n):
+def draw_fibonacci(n):
     a = 0
     b = 1
     square_a = a
@@ -49,13 +49,16 @@ def create_fibonacci(n):
 
     # Fibonacci Spiral Plot
     pen.left(90)
+
     for i in range(n):
         print(b)
         fdwd = math.pi * b * factor / 2
         fdwd /= 90
+
         for j in range(90):
             pen.forward(fdwd)
             pen.left(1)
+
         temp = a
         a = b
         b = temp + b
@@ -84,7 +87,7 @@ if n > 0:
     pen.speed(100)
 
     # Create the Fibonacci Spiral Fractal
-    create_fibonacci(n)
+    draw_fibonacci(n)
 
     # Hold the screen
     turtle.done()
