@@ -27,8 +27,8 @@ ball.color("white")
 ball.shapesize(stretch_wid=0.3, stretch_len=0.3)
 ball.penup()
 ball.goto(0, 0)
-ball.dx = random.choice((8, 9, 10, 11))
-ball.dy = random.choice((-8, -9, -10, -11))
+ball.dx = random.choice((6, 7, 8, 9, 10, 11))
+ball.dy = random.choice((6, -7, -8, -9, -10, -11))
 
 # Draw block
 x_list = [188, 159.1, 130.2, 101.3, 72.4, 43.5, 14.5,
@@ -137,8 +137,8 @@ def collision_paddle():
     if -240 >= ball.ycor() > -250 and\
        paddle.xcor() + 24 > ball.xcor() > paddle.xcor() - 24:
         ball.sety(-240)
-        ball.dy *= -1
         # playsound("bounce.wav")
+        ball.dy *= -1
 
 
 # keyboard
@@ -167,39 +167,27 @@ while block_count:
         hud_life.clear()
         hud_life.write(f"{life}", align="center",
                        font=("Press Start 2P", 24, "normal"))
-        # playsound("bounce.wav")
+        # playsound("game over.wav")
         ball.goto(0, 0)
-        ball.dy *= -1
 
     # Colission with block
-    if ball.ycor() < -280:
-        ball.goto(0, 0)
-        ball.dx *= -1
-        life -= 1
-        hud_score.clear()
-        hud_score.write(f"{score}", align="center",
-                        font=("Press Start 2P", 24, "normal"))
-        hud_life.clear()
-        hud_life.write(f"{life}", align="center",
-                       font=("Press Start 2P", 24, "normal"))
-        # playsound("bit bounce.wav")
-
     for i in block_list:
         if ball.xcor() + 10 >= i.xcor() - 10 and\
            ball.xcor() - 10 <= i.xcor() + 10:
             if ball.ycor() >= i.ycor() - 5 and\
                ball.ycor() <= i.ycor() + 5:
+                # playsound("bit bounce.wav")
                 ball.dy *= -1
                 i.goto(1000, 1000)
                 print(i.color())
 
-                if (i.color()[0] == 'red'):
+                if (i.color()[0] == "red"):
                     score += 7
-                elif (i.color()[0] == 'orange'):
+                elif (i.color()[0] == "orange"):
                     score += 5
-                elif (i.color()[0] == 'green'):
+                elif (i.color()[0] == "green"):
                     score += 3
-                elif (i.color()[0] == 'yellow'):
+                elif (i.color()[0] == "yellow"):
                     score += 1
 
                 block_count -= 1
@@ -210,16 +198,14 @@ while block_count:
                 hud_life.clear()
                 hud_life.write(f"{life}", align="center",
                                font=("Press Start 2P", 24, "normal"))
-                # playsound("bit bounce.wav")
 
     if life == 0:
         screen.clear()
         screen.bgcolor("black")
         hud_score.clear()
         hud_score.goto(0, 0)
-        hud_score.write(f'GAME OVER\nScore: {score}', align='center',
+        hud_score.write(f"GAME OVER\nScore: {score}", align="center",
                         font=("Press Start 2P", 24, "normal"))
-        # playsound("game over.wav")
         break
 
 turtle.mainloop()
