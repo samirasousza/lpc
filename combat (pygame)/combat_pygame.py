@@ -1,4 +1,12 @@
 import pygame
+from modules.combat_player import *
+from modules.combat_bullet import *
+from modules.combat_obs import *
+from modules.combat_score import *
+import random
+
+rnd_x = random.randint(15, 960)
+rnd_y = random.randint(115, 660)
 
 pygame.init()
 
@@ -8,125 +16,59 @@ COLOR_GREEN = (147, 194, 81)
 COLOR_PURPLE = (87, 88, 210)
 COLOR_WHITE = (225, 225, 225)
 
-# screen
+# screen size
 size = (1050, 750)
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Combat - PyGame Edition - 2023-13-01")
 
 # score text player 1
-score_1_font = pygame.font.Font('assets/PressStart2P.ttf', 80)
-score_1_text = score_1_font.render('0', True, COLOR_GREEN, COLOR_RED)
-score_1_text_rect = score_1_text.get_rect()
-score_1_text_rect.center = (275, 48)
+score_1_text = Score(screen)
 
 # score text player 2
-score_2_font = pygame.font.Font('assets/PressStart2P.ttf', 80)
-score_2_text = score_2_font.render('0', True, COLOR_PURPLE, COLOR_RED)
-score_2_text_rect = score_2_text.get_rect()
-score_2_text_rect.center = (775, 48)
-
-# sound effects
-#bounce_sound_effect = pygame.mixer.Sound('assets/bounce.wav')
-#scoring_sound_effect = pygame.mixer.Sound('assets/258020__kodack__arcade-bleep-sound.wav')
+score_2_text = Score(screen)
 
 # player 1 (green)
-player_1 = pygame.image.load("assets/player_1.png")
-player_1_size = (60, 60)
-player_1 = pygame.transform.scale(player_1, player_1_size)
+player_1_image = pygame.image.load("assets/player_1.png")
 player_1_x = 55
 player_1_y = 395
-player_1_move_up = False
-player_1_move_down = False
+player_1 = Player(player_1_x, player_1_y, player_1_image)
 
 # player 2 (purple)
-player_2 = pygame.image.load("assets/player_2.png")
-player_2_size = (60, 60)
-player_2 = pygame.transform.scale(player_2, player_2_size)
-player_2 = pygame.transform.rotate(player_2, 180)
+player_2_image = pygame.image.load("assets/player_2.png")
 player_2_x = 935
 player_2_y = 395
-player_2_move_up = False
-player_2_move_down = False
+player_2 = Player(player_2_x, player_2_y, player_2_image)
 
-# ball 1
-ball_1 = pygame.image.load("assets/ball_green.png")
-ball_size = (6, 6)
-ball_1 = pygame.transform.scale(ball_1, ball_size)
-ball_1_x = 60
-ball_1_y = 180
-ball_1_dx = 1
-ball_1_dy = 1
+ball_1_image = pygame.image.load("./assets/ball_green.png")
+ball_2_image = pygame.image.load("./assets/ball_purple.png")
 
-# ball 2
-ball_2 = pygame.image.load("assets/ball_purple.png")
-ball_size = (6, 6)
-ball_2 = pygame.transform.scale(ball_2, ball_size)
-ball_2_x = 1000
-ball_2_y = 180
-ball_2_dx = 1
-ball_2_dy = 1
+bullets = pygame.sprite.Group()
 
+obstacles = [
+    pygame.Rect(285, 400, 105, 50), pygame.Rect(660, 400, 105, 50),
+    pygame.Rect(500, 545, 50, 105), pygame.Rect(500, 200, 50, 105),
+    pygame.Rect(0, 95, 1060, 30), pygame.Rect(0, 720, 1060, 30),
+    pygame.Rect(0, 95, 25, 700), pygame.Rect(1025, 95, 25, 700)
+    ]
 
-# barrier
-def obstacle(pos, size):
-    obstacle = pygame.image.load("assets/obstacle.png")
-    obstacle_pos = pos
-    obstacle_size = size
-    obstacle = pygame.transform.scale(obstacle, obstacle_size)
+wall_right = [
+    pygame.Rect(140, 350, 25, 150), pygame.Rect(115, 350, 25, 25),
+    pygame.Rect(115, 475, 25, 25)
+    ]
 
-    return obstacle
+wall_left = [
+    pygame.Rect(880, 350, 25, 150), pygame.Rect(905, 350, 25, 25),
+    pygame.Rect(905, 475, 25, 25)
+    ]
 
-
-# border up
-border_up_pos = (0, 95)
-border_up_size = (1060, 30)
-border_up = obstacle(border_up_pos, border_up_size)
-
-# border down
-border_down_pos = (0, 725)
-border_down_size = (1060, 25)
-border_down = obstacle(border_down_pos, border_down_size)
-
-# border right
-border_right_pos = (1025, 95)
-border_right_size = (25, 700)
-border_right = obstacle(border_right_pos, border_right_size)
-
-# border left
-border_left_pos = (0, 95)
-border_left_size = (25, 700)
-border_left = obstacle(border_left_pos, border_left_size)
-
-# obstacle up
-obstacle_up_pos = (500, 205)
-obstacle_up_size = (50, 105)
-obstacle_up = obstacle(obstacle_up_pos, obstacle_up_size)
-
-# obstacle down
-obstacle_down_pos = (500, 540)
-obstacle_down_size = (50, 105)
-obstacle_down = obstacle(obstacle_down_pos, obstacle_down_size)
-
-# obstacle right
-obstacle_right_pos = (660, 400)
-obstacle_right_size = (105, 50)
-obstacle_right = obstacle(obstacle_right_pos, obstacle_right_size)
-
-# obstacle left
-obstacle_left_pos = (285, 400)
-obstacle_left_size = (105, 50)
-obstacle_left = obstacle(obstacle_left_pos, obstacle_left_size)
-
-# wall right
-wall_right = pygame.image.load("assets/wall.png")
-wall_right_pos = (815, 325)
-wall_right_size = (200, 200)
-wall_right = pygame.transform.scale(wall_right, wall_right_size)
-wall_right = pygame.transform.rotate(wall_right, 180)
 
 # score
-score_1 = 0
-score_2 = 0
+score_1, score_2 = 0, 0
+count_1, count_2 = 5, 5
+
+bullet_group_1 = pygame.sprite.Group()
+bullet_group_2 = pygame.sprite.Group()
+
 
 # game loop
 game_loop = True
@@ -137,37 +79,203 @@ while game_loop:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game_loop = False
+        if event.type == pygame.KEYDOWN:
+            # player_1 controls
+            if event.key == pygame.K_d:
+                player_1.rotate_left = True
+            if event.key == pygame.K_a:
+                player_1.rotate_right = True
+            if event.key == pygame.K_w:
+                player_1.forward = True
+            if event.key == pygame.K_c:
+                if len(bullet_group_2) < 1:
+                    bullet_group_2.add(player_1.create_bullet(ball_1_image))
+            # player_2 controls
+            if event.key == pygame.K_LEFT:
+                player_2.rotate_right = True
+            if event.key == pygame.K_RIGHT:
+                player_2.rotate_left = True
+            if event.key == pygame.K_UP:
+                player_2.forward = True
+            if event.key == pygame.K_SPACE:
+                if len(bullet_group_1) < 1:
+                    bullet_group_1.add(player_2.create_bullet(ball_2_image))
+        if event.type == pygame.KEYUP:
+            # player_1 controls
+            if event.key == pygame.K_d:
+                player_1.rotate_left = False
+            if event.key == pygame.K_a:
+                player_1.rotate_right = False
+            if event.key == pygame.K_w:
+                player_1.forward = False
+            # player_2 controls
+            if event.key == pygame.K_LEFT:
+                player_2.rotate_right = False
+            if event.key == pygame.K_RIGHT:
+                player_2.rotate_left = False
+            if event.key == pygame.K_UP:
+                player_2.forward = False
 
-    # screen
+    rnd_x, rnd_y = 0, 0
+    # player 1 movement
+
+    player_1.movement()
+    player_2.movement()
+    
+    # screen color
     screen.fill(COLOR_RED)
+    
+    # draw screen
+    screen.blit(player_1.image, player_1.rect)
+    screen.blit(player_2.image, player_2.rect)
 
-    # draw initial obstacle
-    pygame.draw.rect(screen, COLOR_YELLOW, (140, 350, 25, 150))
-    pygame.draw.rect(screen, COLOR_YELLOW, (115, 350, 25, 25))
-    pygame.draw.rect(screen, COLOR_YELLOW, (115, 475, 25, 25))
+    for obs in obstacles:
+        pygame.draw.rect(screen, COLOR_YELLOW, obs)
+        if player_2.rect.colliderect(obs):
+            if player_2.rect.left > obs.left:
+                player_2.rect.left = obs.right
+                player_2.pos = pygame.Vector2(player_2.rect.center)
+            elif player_2.rect.right > obs.left:
+                player_2.rect.right = obs.left
+                player_2.pos = pygame.Vector2(player_2.rect.center)
+            elif player_2.rect.right > obs.bottom:
+                print(obs.top)
+                player_2.rect.right = obs.bottom + 50
+                player_2.pos = pygame.Vector2(player_2.rect.center)
 
-    # mostrar na tela
-    screen.blit(ball_1, (ball_1_x, ball_1_y))
-    screen.blit(ball_2, (ball_2_x, ball_2_y))
+        if player_1.rect.colliderect(obs):
+            if player_1.rect.right > obs.left:
+                player_1.rect.right = obs.left
+                player_1.pos = pygame.Vector2(player_1.rect.center)
+            elif player_1.rect.left > obs.left:
+                player_1.rect.left = obs.right
+                player_1.pos = pygame.Vector2(player_1.rect.center)
 
-    screen.blit(player_1, (player_1_x, player_1_y))
-    screen.blit(player_2, (player_2_x, player_2_y))
+    for walls in wall_left:
+        pygame.draw.rect(screen, COLOR_YELLOW, walls)
+        if player_2.rect.colliderect(walls):
+            if player_2.rect.left > walls.left:
+                player_2.rect.left = walls.right
+                player_2.pos = pygame.Vector2(player_2.rect.center)
+            elif player_2.rect.right > walls.left:
+                player_2.rect.right = walls.left
+                player_2.pos = pygame.Vector2(player_2.rect.center)
+        if player_1.rect.colliderect(walls):
+            if player_1.rect.right > walls.left:
+                player_1.rect.right = walls.left
+                player_1.pos = pygame.Vector2(player_1.rect.center)
+            elif player_1.rect.left > walls.left:
+                player_1.rect.left = walls.right
+                player_1.pos = pygame.Vector2(player_1.rect.center)
+    
+    for walls in wall_right:
+        pygame.draw.rect(screen, COLOR_YELLOW, walls)
+        if player_2.rect.colliderect(walls):
+            if player_2.rect.left > walls.left:
+                player_2.rect.left = walls.right
+                player_2.pos = pygame.Vector2(player_2.rect.center)
+            elif player_2.rect.right > walls.left:
+                player_2.rect.right = walls.left
+                player_2.pos = pygame.Vector2(player_2.rect.center)
+        if player_1.rect.colliderect(walls):
+            if player_1.rect.right > walls.left:
+                player_1.rect.right = walls.left
+                player_1.pos = pygame.Vector2(player_1.rect.center)
+            elif player_1.rect.left > walls.left:
+                player_1.rect.left = walls.right
+                player_1.pos = pygame.Vector2(player_1.rect.center)
 
-    screen.blit(score_1_text, score_1_text_rect)
-    screen.blit(score_2_text, score_2_text_rect)
-
-    screen.blit(border_up, border_up_pos)
-    screen.blit(border_down, border_down_pos)
-    screen.blit(border_left, border_left_pos)
-    screen.blit(border_right, border_right_pos)
-
-    screen.blit(obstacle_up, obstacle_up_pos)
-    screen.blit(obstacle_down, obstacle_down_pos)
-    screen.blit(obstacle_left, obstacle_left_pos)
-    screen.blit(obstacle_right, obstacle_right_pos)
-
-    screen.blit(wall_right, wall_right_pos)
-
+    score_1_text.scoring(score_1, screen, COLOR_GREEN, 150, 15)
+    score_1_text.scoring(score_2, screen,  COLOR_PURPLE, 775, 15)
+    bullet_group_1.draw(screen)
+    bullet_group_1.update()
+    bullet_group_2.draw(screen)
+    bullet_group_2.update()
+    
+    for bullet in bullet_group_1:
+        for i in obstacles:
+            if bullet.border_collision() == 1:
+                count_1 -= 1
+            if bullet.rect.colliderect(i):
+                count_1 -= 1
+                bullet.direction.x *= -1
+                bullet.direction.y *= 2/3
+            if count_1 == 0:
+                count_1 = 5
+                bullet.kill()
+        for i in wall_left:
+            if bullet.rect.colliderect(i):
+                bullet.direction.x *= -1
+                bullet.direction.y *= -2/3
+                if bullet.rect.top >= i.bottom + 50:
+                    bullet.direction.x *= -1
+                    bullet.direction.y *= 2/3
+                    bullet.rect.top = i.bottom + 50
+                if bullet.rect.bottom == i.top + 50:
+                    bullet.direction.x *= -1
+                    bullet.direction.y *= 2/3
+                    bullet.rect.bottom = i.top + 50
+        for i in wall_right:
+            if bullet.rect.colliderect(i):
+                bullet.direction.x *= -1
+                bullet.direction.y *= -2/3
+                if bullet.rect.top >= i.bottom + 50:
+                    bullet.direction.x *= -1
+                    bullet.direction.y *= 2/3
+                    bullet.rect.top = i.bottom + 50
+                if bullet.rect.bottom == i.top + 100:
+                    bullet.direction.x *= -1
+                    bullet.direction.y *= 2/3
+                    bullet.rect.bottom = i.top + 50
+        collide_2 = pygame.Rect.colliderect(player_1.rect, bullet.rect)
+        if collide_2:
+            score_2 += 1
+            bullet.kill()
+            player_1.rect.center = round(rnd_x), round(rnd_y)
+            player_1.pos = pygame.Vector2(player_1.rect.center)
+             
+    for bullet in bullet_group_2:
+        for i in obstacles:
+            if bullet.border_collision() == 1:
+                count_2 -= 1
+            if bullet.rect.colliderect(i):
+                count_2 -= 1
+                bullet.direction.x *= -1
+                bullet.direction.y *= -2/3
+            if count_2 == 0:
+                count_2 = 5
+                bullet.kill()
+        for i in wall_left:
+            if bullet.rect.colliderect(i):
+                bullet.direction.x *= -1
+                bullet.direction.y *= -2/3
+                if bullet.rect.top == i.bottom + 50:
+                    bullet.direction.x *= -1
+                    bullet.direction.y *= 2/3
+                    bullet.rect.top = i.bottom
+                if bullet.rect.bottom == i.top + 50:
+                    bullet.direction.x *= -1
+                    bullet.direction.y *= 2/3
+                    bullet.rect.bottom = i.top + 50
+        for i in wall_right:
+            if bullet.rect.colliderect(i):
+                bullet.direction.x *= -1
+                bullet.direction.y *= -2/3
+                if bullet.rect.top == i.bottom + 50:
+                    bullet.direction.y *= -1
+                    bullet.rect.top = i.bottom + 50
+                    bullet.direction.y *= 2/3
+                if bullet.rect.bottom == i.top + 75:
+                    bullet.direction.x *= -1
+                    bullet.direction.y *= 2/3
+                    bullet.rect.bottom = i.top + 50
+        collide_1 = pygame.Rect.colliderect(player_2.rect, bullet.rect)
+        if collide_1:
+            score_1 += 1
+            bullet.kill()
+            player_2.rect.center = round(rnd_x), round(rnd_y)
+            player_2.pos = pygame.Vector2(player_2.rect.center)
+    
     # update screen
     pygame.display.flip()
     game_clock.tick(60)
